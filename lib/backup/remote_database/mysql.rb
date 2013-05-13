@@ -7,15 +7,15 @@ module Backup
       ##
       # Name of the database that needs to get dumped
       # To dump all databases, set this to `:all` or leave blank.
-      attr_accessor :name
+      attr_accessor :remote_name
 
       ##
       # Credentials for the specified database
-      attr_accessor :username, :password
+      attr_accessor :remote_username, :remote_password
 
       ##
       # Connectivity options
-      attr_accessor :host, :port, :socket
+      attr_accessor :remote_host, :remote_port, :remote_socket
 
       ##
       # Tables to skip while dumping the database
@@ -38,7 +38,7 @@ module Backup
         super
         instance_eval(&block) if block_given?
 
-        @name ||= :all
+        @remote_name ||= :all
       end
 
       ##
@@ -48,6 +48,9 @@ module Backup
       #   <trigger>/databases/MySQL[-<database_id>].sql[.gz]
       def perform!
         super
+
+        run "#{ utility(:ssh) } #{ ssh_transport_args } #{ ssh_host } " +
+               %Q["mkdir -p '#{ dest_path }'"]
 
         pipeline = Pipeline.new
         dump_ext = 'sql'
@@ -60,7 +63,7 @@ module Backup
         end if model.compressor
 
         pipeline << "#{ utility(:cat) } > " +
-            "'#{ File.join(dump_path, dump_filename) }.#{ dump_ext }'"
+            "'#{ File.join(remote_path, dump_filename) }.#{ dump_ext }'"
 
         pipeline.run
         if pipeline.success?
@@ -74,24 +77,24 @@ module Backup
       private
 
       def mysqldump
-        "#{ utility(:mysqldump) } #{ credential_options } " +
+        "mysqldump #{ credential_options } " +
         "#{ connectivity_options } #{ user_options } #{ name_option } " +
         "#{ tables_to_dump } #{ tables_to_skip }"
       end
 
       def credential_options
         opts = []
-        opts << "--user='#{ username }'" if username
-        opts << "--password='#{ password }'" if password
+        opts << "--user='#{ remote_username }'" if remote_username
+        opts << "--password='#{ remote_password }'" if remote_password
         opts.join(' ')
       end
 
       def connectivity_options
-        return "--socket='#{ socket }'" if socket
+        return "--socket='#{ remote_socket }'" if remote_socket
 
         opts = []
-        opts << "--host='#{ host }'" if host
-        opts << "--port='#{ port }'" if port
+        opts << "--host='#{ remote_host }'" if remote_host
+        opts << "--port='#{ remote_port }'" if remote_port
         opts.join(' ')
       end
 
@@ -100,7 +103,7 @@ module Backup
       end
 
       def name_option
-        dump_all? ? '--all-databases' : name
+        dump_all? ? '--all-databases' : remote_name
       end
 
       def tables_to_dump
@@ -109,13 +112,13 @@ module Backup
 
       def tables_to_skip
         Array(skip_tables).map do |table|
-          table = (dump_all? || table['.']) ? table : "#{ name }.#{ table }"
+          table = (dump_all? || table['.']) ? table : "#{ remote_name }.#{ table }"
           "--ignore-table='#{ table }'"
         end.join(' ')
       end
 
       def dump_all?
-        name == :all
+        remote_name == :all
       end
 
       attr_deprecate :utility_path, :version => '3.0.21',

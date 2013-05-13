@@ -38,6 +38,10 @@ module Backup
     attr_reader :databases
 
     ##
+    # The remote_databases attribute holds an array of remote database objects
+    attr_reader :remote_databases
+
+    ##
     # The archives attr_accessor holds an array of archive objects
     attr_reader :archives
 
@@ -110,6 +114,13 @@ module Backup
           new(self, database_id, &block)
     end
 
+    ##
+    # Adds a remote database to the array of databases
+    # to dump during the backup process
+    def remote_database(name, database_id = nil, &block)
+      @remote_databases << get_class_from_scope(RemoteDatabase, name).
+          new(self, database_id, &block)
+    end
     ##
     # Adds a storage method to the array of storage
     # methods to use during the backup process
@@ -187,6 +198,9 @@ module Backup
     # [Databases]
     # Runs all (if any) database objects to dump the databases
     ##
+    # [RemoteDatabases]
+    # Runs all (if any) remote database objects to dump the remote databases
+    ##
     # [Archives]
     # Runs all (if any) archive objects to package all their
     # paths in to a single tar file and places it in the backup folder
@@ -236,7 +250,7 @@ module Backup
 
       prepare!
 
-      if databases.any? or archives.any?
+      if remote_databases.any? or databases.any? or archives.any?
         procedures.each do |procedure|
           (procedure.call; next) if procedure.is_a?(Proc)
           procedure.each(&:perform!)
@@ -283,13 +297,15 @@ module Backup
     ##
     # Returns an array of procedures
     def procedures
-      [databases, archives, lambda { package! }, storages, lambda { clean! }]
+      [databases, remote_databases, archives, lambda { package! }, storages,
+        lambda { clean! }]
     end
 
     ##
     # Returns an Array of the names (String) of the procedure instance variables
     def procedure_instance_variables
-      [:@databases, :@archives, :@storages, :@notifiers, :@syncers]
+      [:@databases, :@remote_databases, :@archives, :@storages, :@notifiers,
+        :@syncers]
     end
 
     ##

@@ -1,7 +1,5 @@
 # encoding: utf-8
 
-require 'net/ssh'
-
 module Backup
   module RemoteDatabase
     class Base
@@ -71,7 +69,8 @@ module Backup
 
       def prepare!
         # ssh in, and make sure the dump dir exists
-        run "#{ utility(:ssh) } #{ ssh_transport_args } #{ host } " +
+        #
+        run "#{ utility(:ssh) } #{ ssh_transport_args } #{ ssh_host } " +
                %Q["mkdir -p '#{ dest_path }'"]
       end
 
