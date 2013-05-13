@@ -11,11 +11,14 @@ module Backup
 
       ##
       # Credentials for the specified database
-      attr_accessor :remote_username, :remote_password
+      attr_accessor :remote_username
+      attr_accessor :remote_password
 
       ##
       # Connectivity options
-      attr_accessor :remote_host, :remote_port, :remote_socket
+      attr_accessor :remote_host
+      attr_accessor :remote_port
+      attr_accessor :remote_socket
 
       ##
       # Tables to skip while dumping the database
@@ -49,9 +52,9 @@ module Backup
       def perform!
         super
 
-        run "#{ utility(:ssh) } #{ ssh_transport_args } #{ ssh_host } " +
-               %Q["mkdir -p '#{ dest_path }'"]
+        raise connectivity_options
 
+=begin
         pipeline = Pipeline.new
         dump_ext = 'sql'
 
@@ -72,6 +75,7 @@ module Backup
           raise Errors::Database::PipelineError,
               "#{ database_name } Dump Failed!\n" + pipeline.error_messages
         end
+=end
       end
 
       private
