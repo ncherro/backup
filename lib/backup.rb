@@ -17,15 +17,15 @@ module Backup
 
   ##
   # Backup's internal paths
-  LIBRARY_PATH       = File.join(File.dirname(__FILE__), 'backup')
-  STORAGE_PATH       = File.join(LIBRARY_PATH, 'storage')
-  DATABASE_PATH      = File.join(LIBRARY_PATH, 'database')
-  REMOTE_DATABASE_PATH      = File.join(LIBRARY_PATH, 'remote_database')
-  COMPRESSOR_PATH    = File.join(LIBRARY_PATH, 'compressor')
-  ENCRYPTOR_PATH     = File.join(LIBRARY_PATH, 'encryptor')
-  NOTIFIER_PATH      = File.join(LIBRARY_PATH, 'notifier')
-  SYNCER_PATH        = File.join(LIBRARY_PATH, 'syncer')
-  TEMPLATE_PATH      = File.expand_path('../../templates', __FILE__)
+  LIBRARY_PATH         = File.join(File.dirname(__FILE__), 'backup')
+  STORAGE_PATH         = File.join(LIBRARY_PATH, 'storage')
+  DATABASE_PATH        = File.join(LIBRARY_PATH, 'database')
+  REMOTE_DATABASE_PATH = File.join(LIBRARY_PATH, 'remote_database')
+  COMPRESSOR_PATH      = File.join(LIBRARY_PATH, 'compressor')
+  ENCRYPTOR_PATH       = File.join(LIBRARY_PATH, 'encryptor')
+  NOTIFIER_PATH        = File.join(LIBRARY_PATH, 'notifier')
+  SYNCER_PATH          = File.join(LIBRARY_PATH, 'syncer')
+  TEMPLATE_PATH        = File.expand_path('../../templates', __FILE__)
 
   ##
   # Autoload Backup storage files
@@ -74,9 +74,9 @@ module Backup
   ##
   # Autoload Backup remote database files
   module RemoteDatabase
-    autoload :Base,       File.join(DATABASE_PATH, 'base')
-    autoload :MySQL,      File.join(DATABASE_PATH, 'mysql')
-    autoload :PostgreSQL, File.join(DATABASE_PATH, 'postgresql')
+    autoload :Base,       File.join(REMOTE_DATABASE_PATH, 'base')
+    autoload :MySQL,      File.join(REMOTE_DATABASE_PATH, 'mysql')
+    autoload :PostgreSQL, File.join(REMOTE_DATABASE_PATH, 'postgresql')
   end
 
   ##
